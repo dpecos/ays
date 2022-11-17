@@ -2,6 +2,11 @@
 name = "confirm"
 version = "0.1.0"
 edition = "2021"
+description = "Pipe stdin to stdout after user confirmation"
+authors = ["Daniel Pecos Martinez <me@danielpecos.com>"]
+license = "MIT"
+homepage = "https://github.com/dpecos/confirm"
+repository = "https://github.com/dpecos/confirm"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
