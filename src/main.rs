@@ -1,6 +1,15 @@
 use std::env;
 use std::fs::File;
-use std::io::{self, prelude::*, Write};
+use std::io::{self, prelude::*, BufReader, Write};
+
+const TTY_NAME: &str = "/dev/tty";
+
+fn clear_tty() -> io::Result<usize> {
+    let tty = File::open(TTY_NAME)?;
+    let mut reader = BufReader::new(tty);
+    let mut buffer = String::new();
+    reader.read_line(&mut buffer)
+}
 
 fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
     let mut tty_wo = File::create("/dev/tty")?;
@@ -19,7 +28,20 @@ fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
 
     writeln!(tty_wo, "")?;
 
-    Ok(input.unwrap().eq_ignore_ascii_case(&'y'))
+    let contents = input.unwrap();
+    let confirmed = contents.eq_ignore_ascii_case(&'y');
+
+    if !contents.eq(&'\n') {
+        // if amount of chars left to consume is different than 1 (/n) it wasn't an affirmative
+        // response, but something else
+        if clear_tty()? != 1 {
+            return Ok(false);
+        } else {
+            return Ok(confirmed);
+        }
+    }
+
+    Ok(confirmed)
 }
 
 fn pipe_stdin_into_stdout() -> io::Result<()> {
