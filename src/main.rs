@@ -1,9 +1,14 @@
+use std::env;
 use std::fs::File;
 use std::io::{self, prelude::*, Write};
 
-fn prompt_user() -> io::Result<bool> {
+fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
     let mut tty_wo = File::create("/dev/tty")?;
-    write!(tty_wo, "Are you sure? y/[n] ")?;
+    write!(
+        tty_wo,
+        "{} [y/N] ",
+        prompt.unwrap_or("Are you sure?".to_string())
+    )?;
 
     let tty_ro = File::open("/dev/tty")?;
     let input = tty_ro
@@ -30,7 +35,10 @@ fn pipe_stdin_into_stdout() -> io::Result<()> {
 }
 
 fn main() -> io::Result<()> {
-    match prompt_user() {
+    let args: Vec<String> = env::args().collect();
+    let prompt = args.get(1);
+
+    match prompt_user(prompt.cloned()) {
         Ok(answer) => {
             if answer {
                 pipe_stdin_into_stdout()?
