@@ -44,11 +44,21 @@ fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
     Ok(confirmed)
 }
 
-fn pipe_stdin_into_stdout() -> io::Result<()> {
+fn read_line_from_stdin() -> io::Result<String> {
     let stdin = io::stdin();
+    let mut buffer = String::new();
+    stdin.read_line(&mut buffer)?;
+    Ok(buffer)
+}
+
+fn pipe_stdin_into_stdout(first_line_from_stdin: String) -> io::Result<()> {
+    let stdin = io::stdin();
+    let line_reader = io::Cursor::new(first_line_from_stdin);
+    let input_reader = line_reader.chain(BufReader::new(stdin));
+
     let mut stdout = io::stdout().lock();
 
-    for (_index, line) in stdin.lines().enumerate() {
+    for (_index, line) in input_reader.lines().enumerate() {
         stdout.write_all(line?.as_bytes())?;
         stdout.write(b"\n")?;
     }
@@ -60,13 +70,17 @@ fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
     let prompt = args.get(1);
 
-    match prompt_user(prompt.cloned()) {
-        Ok(answer) => {
-            if answer {
-                pipe_stdin_into_stdout()?
+    let line_from_stdin = read_line_from_stdin()?;
+
+    if !line_from_stdin.is_empty() {
+        match prompt_user(prompt.cloned()) {
+            Ok(answer) => {
+                if answer {
+                    pipe_stdin_into_stdout(line_from_stdin)?
+                }
             }
+            Err(err) => println!("Error: {}", err),
         }
-        Err(err) => println!("Error: {}", err),
     }
     Ok(())
 }
