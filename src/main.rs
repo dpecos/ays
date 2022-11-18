@@ -26,20 +26,23 @@ fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
         .and_then(|result| result.ok())
         .map(|byte| byte as char);
 
-    writeln!(tty_wo, "")?;
-
     let contents = input.unwrap();
-    let confirmed = contents.eq_ignore_ascii_case(&'y');
+    let mut confirmed = contents.eq_ignore_ascii_case(&'y');
 
     if !contents.eq(&'\n') {
         // if amount of chars left to consume is different than 1 (/n) it wasn't an affirmative
         // response, but something else
         if clear_tty()? != 1 {
-            return Ok(false);
-        } else {
-            return Ok(confirmed);
+            confirmed = false
         }
     }
+
+    if confirmed {
+        write!(tty_wo, "\x1b[32mOk!")?;
+    } else {
+        write!(tty_wo, "\x1b[31mCancelled")?;
+    }
+    writeln!(tty_wo, "\u{001b}[0m")?;
 
     Ok(confirmed)
 }
