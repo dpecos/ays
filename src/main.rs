@@ -4,6 +4,10 @@ use std::io::{self, prelude::*, BufReader, Write};
 
 const TTY_NAME: &str = "/dev/tty";
 
+const COLOR_RED: &str = "\x1b[31m";
+const COLOR_GREEN: &str = "\x1b[32m";
+const COLOR_RESET: &str = "\x1b[0m";
+
 fn clear_tty() -> io::Result<usize> {
     let tty = File::open(TTY_NAME)?;
     let mut reader = BufReader::new(tty);
@@ -12,7 +16,7 @@ fn clear_tty() -> io::Result<usize> {
 }
 
 fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
-    let mut tty_wo = File::create("/dev/tty")?;
+    let mut tty_wo = File::create(TTY_NAME)?;
     write!(
         tty_wo,
         "{} [y/N] ",
@@ -38,11 +42,14 @@ fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
     }
 
     if confirmed {
-        write!(tty_wo, "\x1b[32mOk!")?;
+        write!(tty_wo, "{}Ok!", COLOR_GREEN)?;
     } else {
-        write!(tty_wo, "\x1b[31mCancelled")?;
+        write!(tty_wo, "{}Cancelled", COLOR_RED)?;
     }
-    writeln!(tty_wo, "\u{001b}[0m")?;
+    writeln!(tty_wo, "{}", COLOR_RESET)?;
+
+    // tty_ro.close();
+    // tty_wo.close();
 
     Ok(confirmed)
 }
