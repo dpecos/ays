@@ -1,6 +1,6 @@
 [package]
 name = "ays"
-version = "0.1.0"
+version = "0.1.3"
 edition = "2021"
 description = "Pipe stdin to stdout after user confirmation"
 authors = ["Daniel Pecos Martinez <me@danielpecos.com>"]
