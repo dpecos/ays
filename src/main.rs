@@ -73,6 +73,8 @@ fn pipe_stdin_into_stdout(first_line_from_stdin: String) -> io::Result<()> {
         stdout.write(b"\n")?;
     }
 
+    stdout.flush()?;
+
     Ok(())
 }
 
