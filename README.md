@@ -10,6 +10,8 @@ its `stdin` into its `stdout`. If the user does not successfully confirm, `ays` 
 I've personally found that `ays` is a great companion for `fzf`, but I'm pretty sure people will find other really
 interesting use cases. See some of my personal use cases down below.
 
+[ays](./docs/ays.gif)
+
 ## Install
 
 ```
