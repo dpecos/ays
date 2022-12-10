@@ -23,7 +23,7 @@ fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
         prompt.unwrap_or("Are you sure?".to_string())
     )?;
 
-    let tty_ro = File::open("/dev/tty")?;
+    let tty_ro = File::open(TTY_NAME)?;
     let input = tty_ro
         .bytes()
         .next()
