@@ -17,6 +17,7 @@ fn clear_tty() -> io::Result<usize> {
 
 fn prompt_user(prompt: Option<String>) -> io::Result<bool> {
     let mut tty_wo = File::create(TTY_NAME)?;
+
     write!(
         tty_wo,
         "{} [y/N] ",
@@ -61,6 +62,24 @@ fn read_line_from_stdin() -> io::Result<String> {
     Ok(buffer)
 }
 
+fn preview_stdin() -> io::Result<String> {
+    let mut contents = String::new();
+    loop {
+        let r = io::stdin().read_line(&mut contents)?;
+        if r == 0 {
+            break;
+        }
+    }
+
+    let mut tty_wo = File::create(TTY_NAME)?;
+    write!(tty_wo, "{}Preview: ", COLOR_GREEN)?;
+    write!(tty_wo, "{}", COLOR_RESET)?;
+    write!(tty_wo, "{}", contents)?;
+    tty_wo.flush()?;
+
+    Ok(contents)
+}
+
 fn pipe_stdin_into_stdout(first_line_from_stdin: String) -> io::Result<()> {
     let stdin = io::stdin();
     let line_reader = io::Cursor::new(first_line_from_stdin);
@@ -80,12 +99,26 @@ fn pipe_stdin_into_stdout(first_line_from_stdin: String) -> io::Result<()> {
 
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
-    let prompt = args.get(1);
+    let mut preview = false;
+    let mut prompt: Option<String> = None;
 
-    let line_from_stdin = read_line_from_stdin()?;
+    for arg in args.iter() {
+        if arg.eq("--preview") {
+          preview = true
+        } else {
+          prompt = Some(arg.to_string())
+        }
+    }
+
+    let line_from_stdin;
+    if preview {
+        line_from_stdin = preview_stdin()?;
+    } else {
+        line_from_stdin = read_line_from_stdin()?;
+    }
 
     if !line_from_stdin.is_empty() {
-        match prompt_user(prompt.cloned()) {
+        match prompt_user(prompt) {
             Ok(answer) => {
                 if answer {
                     pipe_stdin_into_stdout(line_from_stdin)?
