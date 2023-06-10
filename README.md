@@ -21,11 +21,13 @@ cargo install ays
 ## Usage
 
 ```
-ays ["alternative prompt"]
+ays [--preview] ["alternative prompt"]
 ```
 
 If you'd like `ays` to use a different prompt message than the default "Are you sure?", you can specify it as its
 parameter (`ays` will append the closing question mark itself).
+
+- `--preview`: buffer the contents of the stdin and display it back to the user
 
 ## Examples
 
