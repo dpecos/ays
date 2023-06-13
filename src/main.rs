@@ -102,7 +102,10 @@ fn main() -> io::Result<()> {
     let mut preview = false;
     let mut prompt: Option<String> = None;
 
-    for arg in args.iter() {
+    for (i, arg) in args.iter().enumerate() {
+        if i == 0 {
+            continue;
+        }
         if arg.eq("--preview") {
           preview = true
         } else {
